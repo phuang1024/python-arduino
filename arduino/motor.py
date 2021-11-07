@@ -16,3 +16,77 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+import time
+from typing import Tuple
+from .core import ArduinoBoard
+
+
+class Stepper_28BYJ48:
+    """
+    Control a 28BYJ-48 stepper motor.
+    """
+
+    board: ArduinoBoard
+    pins: Tuple[int, int, int, int]
+    spr: int
+
+    _rotate_keys = (
+        "1010",
+        "0110",
+        "0101",
+        "1001",
+    )
+
+    def __init__(self, board: ArduinoBoard, pins: Tuple[int, int, int, int], spr=2048):
+        """
+        Initialize the motor controller.
+
+        :param board: The Arduino board.
+        :param pins: Indices of the digital pins that control the motor in
+            left to right order (e.g. ``(8, 9, 10, 11)``)
+        :param spr: Steps per rotation.
+        """
+        self.board = board
+        self.pins = pins
+        self.spr = spr
+
+    def write_pins(self, key: str, pause: float = 0):
+        """
+        Write values to each of the four pins.
+
+        :param key: Length 4 string of ``"0"`` or ``"1"`` corresponding to
+            the values of the four pins.
+        :param pause: Seconds to sleep after the step.
+        """
+        for i in range(4):
+            self.board.write_digital(self.pins[i], int(key[i]))
+        time.sleep(pause)
+
+    def step(self, cw: bool, pause: float = 0):
+        """
+        Rotate one step.
+
+        :param cw: Whether to rotate clockwise.
+        :param pause: Total seconds the step takes.
+        """
+        keys = self._rotate_keys if cw else reversed(self._rotate_keys)
+        for key in keys:
+            self.write_pins(key, pause/4)
+
+    def rotate(self, rounds: float, speed: float):
+        """
+        Rotate the motor.
+
+        :param rounds: Number of revolutions to rotate.
+        :param speed: RPM speed.
+        """
+        cw = rounds > 0
+        rounds = abs(rounds)
+
+        total_time = rounds / (speed/60)
+        steps = int(rounds * self.spr)
+        step_time = total_time / steps
+
+        for _ in range(steps):
+            self.step(cw, step_time)

@@ -17,7 +17,27 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-__version__ = "0.0.1"
+import pyfirmata
 
-from .core import *
-from . import motor
+
+class ArduinoBoard:
+    """
+    Wrapper for ``pyfirmata.Arduino`` with type hinting and docs.
+    """
+
+    def __init__(self, path: str):
+        """
+        Initialize the board.
+
+        :param path: Path to the Arduino board. See docs for more info.
+        """
+        self.board = pyfirmata.Arduino(path)
+
+    def write_digital(self, pin: int, value: int):
+        """
+        Write a value to a digital pin.
+
+        :param pin: Pin index.
+        :param value: Value to write.
+        """
+        self.board.digital[pin].write(value)
