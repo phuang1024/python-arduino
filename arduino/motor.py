@@ -32,9 +32,9 @@ class Stepper_28BYJ48:
     spr: int
 
     _rotate_keys = (
-        "1010",
+        "1100",
         "0110",
-        "0101",
+        "0011",
         "1001",
     )
 
@@ -89,8 +89,7 @@ class Stepper_28BYJ48:
 
         next_time = time.time()
         for _ in range(steps):
-            while time.time() < next_time:
-                time.sleep(0.0005)
+            time.sleep(max(0, next_time - time.time()))
             next_time += step_time
 
             self.step(cw, step_time)

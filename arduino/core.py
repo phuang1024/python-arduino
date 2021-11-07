@@ -17,7 +17,42 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import time
 import pyfirmata
+
+
+class Clock:
+    """
+    Clock based on absolute time.
+    Sleep is more precise than time.sleep()
+    """
+
+    def __init__(self, t=0):
+        """
+        Initialize the clock.
+
+        :param t: The time to start the clock at. Default 0.
+        """
+        self.start = time.time() - t
+
+    def reset(self, t=0):
+        """
+        Reset time (or set to t).
+        """
+        self.start = time.time() - t
+
+    def time(self):
+        """
+        Return time since elapse.
+        """
+        return time.time() - self.start
+
+    def waitto(self, t):
+        """
+        Sleep until time is t.
+        """
+        while self.time() < t:
+            time.sleep(0.0005)
 
 
 class ArduinoBoard:
