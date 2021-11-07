@@ -1,2 +1,5 @@
-# python-arduino
-An API for controlling Arduino boards.
+# Arduino
+
+A Python API for controlling Arduino boards.
+
+[Docs](https://python-arduino.rtfd.io)
