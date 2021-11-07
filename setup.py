@@ -27,7 +27,7 @@ with open("requirements.txt", "r") as file:
 
 setuptools.setup(
     name="python-arduino",
-    version="0.0.2",
+    version="0.0.3",
     author="Patrick Huang",
     author_email="huangpatrick16777216@gmail.com",
     description="An API for controlling Arduino boards.",

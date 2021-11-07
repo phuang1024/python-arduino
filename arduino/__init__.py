@@ -17,7 +17,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 from .core import *
 from . import motor
