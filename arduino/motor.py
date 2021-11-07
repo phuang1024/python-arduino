@@ -38,7 +38,7 @@ class Stepper_28BYJ48:
         "1001",
     )
 
-    def __init__(self, board: ArduinoBoard, pins: Tuple[int, int, int, int], spr=2048):
+    def __init__(self, board: ArduinoBoard, pins: Tuple[int, int, int, int], spr=512):
         """
         Initialize the motor controller.
 
@@ -59,9 +59,12 @@ class Stepper_28BYJ48:
             the values of the four pins.
         :param pause: Seconds to sleep after the step.
         """
+        end = time.time() + pause
         for i in range(4):
             self.board.write_digital(self.pins[i], int(key[i]))
-        time.sleep(pause)
+
+        while time.time() < end:
+            pass
 
     def step(self, cw: bool, pause: float = 0):
         """
@@ -70,7 +73,7 @@ class Stepper_28BYJ48:
         :param cw: Whether to rotate clockwise.
         :param pause: Total seconds the step takes.
         """
-        keys = self._rotate_keys if cw else reversed(self._rotate_keys)
+        keys = reversed(self._rotate_keys) if cw else self._rotate_keys
         for key in keys:
             self.write_pins(key, pause/4)
 
@@ -78,7 +81,7 @@ class Stepper_28BYJ48:
         """
         Rotate the motor.
 
-        :param rounds: Number of revolutions to rotate.
+        :param rounds: Number of revolutions to rotate. Negative values for ccw.
         :param speed: RPM speed.
         """
         cw = rounds > 0
@@ -88,5 +91,10 @@ class Stepper_28BYJ48:
         steps = int(rounds * self.spr)
         step_time = total_time / steps
 
+        next_time = time.time()
         for _ in range(steps):
+            while time.time() < next_time:
+                pass
+            next_time += step_time
+
             self.step(cw, step_time)
