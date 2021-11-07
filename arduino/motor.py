@@ -59,12 +59,8 @@ class Stepper_28BYJ48:
             the values of the four pins.
         :param pause: Seconds to sleep after the step.
         """
-        end = time.time() + pause
         for i in range(4):
             self.board.write_digital(self.pins[i], int(key[i]))
-
-        while time.time() < end:
-            pass
 
     def step(self, cw: bool, pause: float = 0):
         """
@@ -94,7 +90,7 @@ class Stepper_28BYJ48:
         next_time = time.time()
         for _ in range(steps):
             while time.time() < next_time:
-                pass
+                time.sleep(0.0005)
             next_time += step_time
 
             self.step(cw, step_time)
