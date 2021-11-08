@@ -34,6 +34,7 @@ class Clock:
         :param t: The time to start the clock at. Default 0.
         """
         self.start = time.time() - t
+        self.last_tick = self.time()
 
     def reset(self, t=0):
         """
@@ -53,6 +54,13 @@ class Clock:
         """
         while self.time() < t:
             time.sleep(0.0005)
+
+    def tick(self, t):
+        """
+        Wait until time is t + last_tick.
+        """
+        self.waitto(t + self.last_tick)
+        self.last_tick = self.time()
 
 
 class ArduinoBoard:

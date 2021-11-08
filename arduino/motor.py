@@ -19,7 +19,7 @@
 
 import time
 from typing import Tuple
-from .core import ArduinoBoard
+from .core import ArduinoBoard, Clock
 
 
 class Stepper_28BYJ48:
@@ -51,13 +51,12 @@ class Stepper_28BYJ48:
         self.pins = pins
         self.spr = spr
 
-    def write_pins(self, key: str, pause: float = 0):
+    def write_pins(self, key: str):
         """
         Write values to each of the four pins.
 
         :param key: Length 4 string of ``"0"`` or ``"1"`` corresponding to
             the values of the four pins.
-        :param pause: Seconds to sleep after the step.
         """
         for i in range(4):
             self.board.write_digital(self.pins[i], int(key[i]))
@@ -70,8 +69,10 @@ class Stepper_28BYJ48:
         :param pause: Total seconds the step takes.
         """
         keys = reversed(self._rotate_keys) if cw else self._rotate_keys
+        clock = Clock()
         for key in keys:
-            self.write_pins(key, pause/4)
+            self.write_pins(key)
+            clock.tick(pause/4)
 
     def rotate(self, rounds: float, speed: float):
         """
@@ -87,9 +88,7 @@ class Stepper_28BYJ48:
         steps = int(rounds * self.spr)
         step_time = total_time / steps
 
-        next_time = time.time()
+        clock = Clock()
         for _ in range(steps):
-            time.sleep(max(0, next_time - time.time()))
-            next_time += step_time
-
-            self.step(cw, step_time)
+            self.step(cw, step_time * 0.9)
+            clock.tick(step_time)
