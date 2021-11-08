@@ -17,8 +17,11 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-.PHONY: docs
+.PHONY: docs wheel
 
 docs:
 	cd ./docs; \
 	make html; \
+
+wheel:
+	python setup.py bdist_wheel sdist
