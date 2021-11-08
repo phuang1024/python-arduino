@@ -31,6 +31,11 @@ class Stepper_28BYJ48:
     pins: Tuple[int, int, int, int]
     spr: int
 
+    pos: float
+    """
+    Position in revolutions.
+    """
+
     _rotate_keys = (
         "1100",
         "0110",
@@ -50,6 +55,8 @@ class Stepper_28BYJ48:
         self.board = board
         self.pins = pins
         self.spr = spr
+
+        self.pos = 0
 
     def write_pins(self, key: str):
         """
@@ -74,6 +81,21 @@ class Stepper_28BYJ48:
             self.write_pins(key)
             clock.tick(pause/4)
 
+        if cw:
+            self.pos += 1 / self.spr
+        else:
+            self.pos -= 1 / self.spr
+
+    def steps(self, cw: bool, steps: int, total_time: float):
+        """
+        Rotate steps, taking a total of total_time.
+        """
+        step_time = total_time / steps
+        clock = Clock()
+        for _ in range(steps):
+            self.step(cw, step_time * 0.9)  # 0.9 to avoid overshoot
+            clock.tick(step_time)
+
     def rotate(self, rounds: float, speed: float):
         """
         Rotate the motor.
@@ -86,9 +108,14 @@ class Stepper_28BYJ48:
 
         total_time = rounds / (speed/60)
         steps = int(rounds * self.spr)
-        step_time = total_time / steps
+        self.steps(cw, steps, total_time)
 
-        clock = Clock()
-        for _ in range(steps):
-            self.step(cw, step_time * 0.9)
-            clock.tick(step_time)
+    def rotate_to(self, pos: float, speed: float):
+        """
+        Rotate to a position.
+
+        :param pos: Position in revolutions.
+        :param speed: RPM speed.
+        """
+        rounds = pos - self.pos
+        self.rotate(rounds, speed)
