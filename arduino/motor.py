@@ -17,105 +17,35 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import time
-from typing import Tuple
 from .core import ArduinoBoard, Clock
 
 
-class Stepper_28BYJ48:
+class Stepper:
     """
-    Control a 28BYJ-48 stepper motor.
+    Base stepper motor class.
+    Extend from this to create a specific motor.
+
+    This module has some pre-defined stepper classes.
     """
 
-    board: ArduinoBoard
-    pins: Tuple[int, int, int, int]
     spr: int
-
-    pos: float
     """
-    Position in revolutions.
+    Steps per revolution.
     """
 
-    _rotate_keys = (
-        "1100",
-        "0110",
-        "0011",
-        "1001",
-    )
-
-    def __init__(self, board: ArduinoBoard, pins: Tuple[int, int, int, int], spr=512):
+    def __init__(self, board: ArduinoBoard):
         """
-        Initialize the motor controller.
+        Initializes the motor.
 
-        :param board: The Arduino board.
-        :param pins: Indices of the digital pins that control the motor in
-            left to right order (e.g. ``(8, 9, 10, 11)``)
-        :param spr: Steps per rotation.
+        :param board: The board to use.
         """
         self.board = board
-        self.pins = pins
-        self.spr = spr
+        self.pos = 0  # Position in revolutions
 
-        self.pos = 0
-
-    def write_pins(self, key: str):
+    def step(self, cw: bool):
         """
-        Write values to each of the four pins.
+        Step the motor. Define in subclasses.
 
-        :param key: Length 4 string of ``"0"`` or ``"1"`` corresponding to
-            the values of the four pins.
+        :param cw: True if clockwise, False if counter-clockwise.
         """
-        for i in range(4):
-            self.board.write_digital(self.pins[i], int(key[i]))
-
-    def step(self, cw: bool, pause: float = 0):
-        """
-        Rotate one step.
-
-        :param cw: Whether to rotate clockwise.
-        :param pause: Total seconds the step takes.
-        """
-        keys = reversed(self._rotate_keys) if cw else self._rotate_keys
-        clock = Clock()
-        for key in keys:
-            self.write_pins(key)
-            clock.tick(pause/4)
-
-        if cw:
-            self.pos += 1 / self.spr
-        else:
-            self.pos -= 1 / self.spr
-
-    def steps(self, cw: bool, steps: int, total_time: float):
-        """
-        Rotate steps, taking a total of total_time.
-        """
-        step_time = total_time / steps
-        clock = Clock()
-        for _ in range(steps):
-            self.step(cw, step_time * 0.9)  # 0.9 to avoid overshoot
-            clock.tick(step_time)
-
-    def rotate(self, rounds: float, speed: float):
-        """
-        Rotate the motor.
-
-        :param rounds: Number of revolutions to rotate. Negative values for ccw.
-        :param speed: RPM speed.
-        """
-        cw = rounds > 0
-        rounds = abs(rounds)
-
-        total_time = rounds / (speed/60)
-        steps = int(rounds * self.spr)
-        self.steps(cw, steps, total_time)
-
-    def rotate_to(self, pos: float, speed: float):
-        """
-        Rotate to a position.
-
-        :param pos: Position in revolutions.
-        :param speed: RPM speed.
-        """
-        rounds = pos - self.pos
-        self.rotate(rounds, speed)
+        ...
