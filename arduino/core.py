@@ -23,11 +23,11 @@ import pyfirmata
 
 class Clock:
     """
-    Clock based on absolute time.
-    Sleep is more precise than time.sleep()
+    Clock based on absolute time rather than relative.
+    Can tick at a constant rate.
     """
 
-    def __init__(self, t=0):
+    def __init__(self, t: float = 0):
         """
         Initialize the clock.
 
@@ -36,7 +36,7 @@ class Clock:
         self.start = time.time() - t
         self.last_tick = self.time()
 
-    def reset(self, t=0):
+    def reset(self, t: float = 0):
         """
         Reset time (or set to t).
         """
@@ -52,8 +52,7 @@ class Clock:
         """
         Sleep until time is t.
         """
-        while self.time() < t:
-            time.sleep(0.0005)
+        time.sleep(t - self.time())
 
     def tick(self, t):
         """

@@ -24,8 +24,12 @@ class Stepper:
     """
     Base stepper motor class.
     Extend from this to create a specific motor.
+    """
 
-    This module has some pre-defined stepper classes.
+    clock: Clock
+    """
+    Motor's clock.
+    Set at init so no overhead for creating the object.
     """
 
     spr: int
@@ -44,6 +48,7 @@ class Stepper:
 
         :param board: The board to use.
         """
+        self.clock = Clock()
         self.board = board
         self._real_pos = 0
 
