@@ -33,6 +33,11 @@ class Stepper:
     Steps per revolution.
     """
 
+    _real_pos: int
+    """
+    Real position in steps.
+    """
+
     def __init__(self, board: ArduinoBoard):
         """
         Initializes the motor.
@@ -40,12 +45,60 @@ class Stepper:
         :param board: The board to use.
         """
         self.board = board
-        self.pos = 0  # Position in revolutions
+        self._real_pos = 0
 
-    def step(self, cw: bool):
+    @property
+    def pos(self) -> float:
         """
-        Step the motor. Define in subclasses.
+        The current position in degrees.
+        """
+        return self._real_pos / self.spr * 360
+
+    def step(self, cw: bool, t: float):
+        """
+        Step the motor.
+        Calls ``self._step(cw, t)``. Define in a subclass.
 
         :param cw: True if clockwise, False if counter-clockwise.
+        :param t: Total step time.
         """
+        self._step(cw, t)
+        if cw:
+            self._real_pos += 1
+        else:
+            self._real_pos -= 1
+
+    def rotate(self, deg: float, rpm: float):
+        """
+        Rotate the motor.
+
+        :param deg: The angle to rotate in degrees.
+        :param rpm: Speed in revolutions per minute.
+        """
+        self.rotate_for(deg, deg/360 / rpm * 60)
+
+    def rotate_for(self, deg: float, t: float):
+        """
+        Rotate ``deg`` for ``t`` seconds.
+        """
+        steps = int(abs(deg) / 360 * self.spr)
+        step_time = t / steps
+        cw = deg > 0
+
+        for _ in range(steps):
+            self.step(cw, step_time)
+
+    def rotate_to(self, deg: float, rpm: float):
+        """
+        Rotate to ``deg`` at ``rpm`` rotations per minute.
+        """
+        self.rotate(deg - self.pos, rpm)
+
+    def rotate_to_for(self, deg: float, t: float):
+        """
+        Rotate to ``deg`` for ``t`` seconds.
+        """
+        self.rotate_for(deg - self.pos, t)
+
+    def _step(self, cw: bool, t: float):
         ...
