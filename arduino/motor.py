@@ -17,7 +17,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from pyfirmata import Arduino
+from pyfirmata import Board
 from .core import Clock
 
 
@@ -43,15 +43,19 @@ class Stepper:
     Real position in steps.
     """
 
-    def __init__(self, board: Arduino):
+    def __init__(self, board: Board, spr: int):
         """
-        Initializes the motor.
+        Initializes the motor. You may take additional arguments in the subclass.
+        Call super().__init__(board, spr) in the subclass.
 
         :param board: The board to use.
+        :param spr: Steps per revolution.
         """
         self.clock = Clock()
-        self.board = board
         self._real_pos = 0
+
+        self.board = board
+        self.spr = spr
 
     @property
     def pos(self) -> float:
@@ -81,7 +85,7 @@ class Stepper:
         :param deg: The angle to rotate in degrees.
         :param rpm: Speed in revolutions per minute.
         """
-        self.rotate_for(deg, deg/360 / rpm * 60)
+        self.rotate_for(deg, abs(deg)/360 / rpm * 60)
 
     def rotate_for(self, deg: float, t: float):
         """
@@ -107,4 +111,42 @@ class Stepper:
         self.rotate_for(deg - self.pos, t)
 
     def _step(self, cw: bool, t: float):
-        ...
+        """
+        Define in subclass.
+        """
+        raise NotImplementedError("Define Stepper._step in a subclass.")
+
+
+class Stepper_DirPul(Stepper):
+    """
+    Stepper motor with direction and pulse pins.
+    Pulse pul e.g. switch between 0 and 1 to rotate.
+    """
+
+    dir_pin: int
+    pul_pin: int
+
+    def __init__(self, board: Board, spr: int, dir_pin: int, pul_pin: int):
+        """
+        Initializes the motor.
+
+        :param board: The board to use.
+        :param spr: Steps per revolution.
+        :param dir_pin: Pin for direction.
+        :param pul_pin: Pin for pulse.
+        """
+        super().__init__(board, spr)
+
+        self.dir_pin = dir_pin
+        self.pul_pin = pul_pin
+
+    def _step(self, cw: bool, t: float):
+        pause = t / 2
+        self.clock.reset()
+
+        self.board.digital[self.dir_pin].write(cw)
+
+        self.board.digital[self.pul_pin].write(1)
+        self.clock.tick(pause)
+        self.board.digital[self.pul_pin].write(0)
+        self.clock.tick(pause)

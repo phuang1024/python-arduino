@@ -40,6 +40,7 @@ class Clock:
         Reset time (or set to t).
         """
         self.start = time.time() - t
+        self.last_tick = self.time()
 
     def time(self):
         """
@@ -51,7 +52,9 @@ class Clock:
         """
         Sleep until time is t.
         """
-        time.sleep(t - self.time())
+        # Busy but doesn't overshoot
+        while self.time() < t:
+            continue
 
     def tick(self, t):
         """
