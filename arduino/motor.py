@@ -17,7 +17,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from .core import ArduinoBoard, Clock
+from pyfirmata import Arduino
+from .core import Clock
 
 
 class Stepper:
@@ -42,7 +43,7 @@ class Stepper:
     Real position in steps.
     """
 
-    def __init__(self, board: ArduinoBoard):
+    def __init__(self, board: Arduino):
         """
         Initializes the motor.
 

@@ -18,7 +18,6 @@
 #
 
 import time
-import pyfirmata
 
 
 class Clock:
@@ -60,26 +59,3 @@ class Clock:
         """
         self.waitto(t + self.last_tick)
         self.last_tick = self.time()
-
-
-class ArduinoBoard:
-    """
-    Wrapper for ``pyfirmata.Arduino`` with type hinting and docs.
-    """
-
-    def __init__(self, path: str):
-        """
-        Initialize the board.
-
-        :param path: Path to the Arduino board. See docs for more info.
-        """
-        self.board = pyfirmata.Arduino(path)
-
-    def write_digital(self, pin: int, value: int):
-        """
-        Write a value to a digital pin.
-
-        :param pin: Pin index.
-        :param value: Value to write.
-        """
-        self.board.digital[pin].write(value)
