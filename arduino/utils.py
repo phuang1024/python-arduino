@@ -42,7 +42,7 @@ def stepper_max_speed(motor: Stepper, base_spd: float, inc_spd: float, angle: fl
 
     spd = base_spd
     while True:
-        print(f"  Testing speed {spd}: ", end="")
+        print(f"  Testing speed {spd}: ", end="", flush=True)
 
         s = time.time()
         motor.rotate(angle, spd)
@@ -51,7 +51,7 @@ def stepper_max_speed(motor: Stepper, base_spd: float, inc_spd: float, angle: fl
         expected = base_time / spd * base_spd
         diff = abs(elapse - expected)
 
-        print(f"{elapse:.2f}s, expected {expected:.2f}s, diff {diff:.2f}s")
+        print(f"{elapse:.2f}s, expected {expected:.2f}s, diff {diff:.4f}s")
 
         if diff > margin:
             break
